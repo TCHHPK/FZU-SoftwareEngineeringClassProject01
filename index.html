@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人记账本 | Team 2</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-content">
+      <div>
+        <p class="subtitle">SOFTWARE ENGINEERING · TEAM 2</p>
+        <h1>个人记账本</h1>
+        <p>记录每一笔收支，了解你的财务状况</p>
+      </div>
+      <span class="header-tag">本地记账</span>
+    </div>
+  </header>
+
+  <main class="app-container">
+    <nav class="tabs" aria-label="主导航" role="tablist">
+      <button class="tab active" role="tab" data-tab="add" aria-selected="true">新增记账</button>
+      <button class="tab" role="tab" data-tab="records" aria-selected="false">记录明细</button>
+      <button class="tab" role="tab" data-tab="stats" aria-selected="false">统计分析</button>
+      <button class="tab" role="tab" data-tab="settings" aria-selected="false">数据管理</button>
+    </nav>
+
+    <section id="panel-add" class="panel" role="tabpanel">
+      <div class="card form-card">
+        <h2>新增一笔记录</h2>
+        <p class="description">填写以下信息，保存日常收支。</p>
+        <form id="record-form">
+          <div class="form-group">
+            <label for="record-type">收支类型</label>
+            <select id="record-type" required>
+              <option value="expense">支出</option>
+              <option value="income">收入</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="record-date">日期</label>
+            <input id="record-date" type="date" required>
+          </div>
+          <div class="form-group">
+            <label for="record-amount">金额（元）</label>
+            <input id="record-amount" type="number" min="0.01" step="0.01" placeholder="例如：35.50" required>
+          </div>
+          <div class="form-group">
+            <label for="record-category">类别</label>
+            <select id="record-category" required><option value="">请选择类别</option></select>
+          </div>
+          <div class="form-group">
+            <label for="record-note">备注</label>
+            <textarea id="record-note" rows="3" maxlength="200" placeholder="例如：午餐、公交车票"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">保存记录</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="panel-records" class="panel" role="tabpanel" hidden>
+      <div class="card">
+        <h2>记录明细</h2>
+        <p class="description">筛选条件同时作用于记录列表、收支概览和统计图表。</p>
+        <div class="filter-grid">
+          <div class="form-group">
+            <label for="filter-start">开始日期</label>
+            <input type="date" id="filter-start">
+          </div>
+          <div class="form-group">
+            <label for="filter-end">结束日期</label>
+            <input type="date" id="filter-end">
+          </div>
+          <div class="form-group">
+            <label for="filter-type">收支类型</label>
+            <select id="filter-type">
+              <option value="all">全部</option>
+              <option value="income">收入</option>
+              <option value="expense">支出</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="filter-category">类别</label>
+            <select id="filter-category"><option value="all">全部类别</option></select>
+          </div>
+          <div class="form-group">
+            <label for="filter-min-amount">最低金额（元）</label>
+            <input type="number" id="filter-min-amount" min="0" step="0.01" placeholder="不限">
+          </div>
+          <div class="form-group">
+            <label for="filter-max-amount">最高金额（元）</label>
+            <input type="number" id="filter-max-amount" min="0" step="0.01" placeholder="不限">
+          </div>
+        </div>
+        <button type="button" id="filter-reset" class="btn btn-secondary">重置筛选</button>
+        <div id="record-list" class="record-list"><p class="empty-state">暂无记账记录</p></div>
+      </div>
+    </section>
+
+    <section id="panel-stats" class="panel" role="tabpanel" hidden>
+      <h2>收支统计</h2>
+      <p id="stats-scope" class="description">统计范围：全部记录</p>
+      <div class="stats-grid">
+        <div class="card stat-card income-card"><p>总收入</p><h3 id="total-income">¥0.00</h3></div>
+        <div class="card stat-card expense-card"><p>总支出</p><h3 id="total-expense">¥0.00</h3></div>
+        <div class="card stat-card balance-card"><p>当前结余</p><h3 id="total-balance">¥0.00</h3></div>
+      </div>
+      <div class="chart-grid">
+        <div class="card chart-card">
+          <h3>支出类别分布</h3>
+          <canvas id="category-chart" aria-label="支出类别饼图"></canvas>
+          <p id="category-chart-empty" class="empty-state">暂无支出数据</p>
+          <div id="category-legend" class="chart-legend"></div>
+        </div>
+        <div class="card chart-card">
+          <h3>日期收支趋势</h3>
+          <p class="description">最近 7 个有记录的日期</p>
+          <canvas id="date-chart" aria-label="最近 7 个记账日期的收入支出柱状图"></canvas>
+          <p id="date-chart-empty" class="empty-state">暂无统计数据</p>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#16a34a"></span>收入</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#ef4444"></span>支出</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-settings" class="panel" role="tabpanel" hidden>
+      <div class="card">
+        <h2>类别管理</h2>
+        <p class="description">系统预设类别不可删除；已被记录引用的自定义类别不可删除。</p>
+        <div id="category-list"></div>
+        <div class="form-group">
+          <label for="new-category-type">类别类型</label>
+          <select id="new-category-type">
+            <option value="expense">支出类别</option>
+            <option value="income">收入类别</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="new-category">添加自定义类别</label>
+          <input id="new-category" type="text" maxlength="20" placeholder="例如：娱乐、兼职收入">
+        </div>
+        <button id="add-category-btn" class="btn btn-primary" type="button">添加类别</button>
+      </div>
+      <div class="card">
+        <h2>数据导入与导出</h2>
+        <p class="description">数据保存在当前浏览器中。定期导出 JSON 进行备份；导入时按 ID 合并，跳过重复记录。</p>
+        <div class="button-row">
+          <button id="export-json" class="btn btn-secondary" type="button">导出 JSON</button>
+          <button id="export-csv" class="btn btn-secondary" type="button">导出 CSV</button>
+        </div>
+        <div class="form-group">
+          <label for="import-file">导入记账数据（JSON/CSV，最大 5MB）</label>
+          <input id="import-file" type="file" accept=".json,.csv">
+        </div>
+        <button id="import-btn" class="btn btn-primary" type="button">导入文件</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
