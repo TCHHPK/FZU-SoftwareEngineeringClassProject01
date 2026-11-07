@@ -24,8 +24,8 @@ export function getActiveFilters() {
     endDate: valueOf('filter-end').trim(),
     type: valueOf('filter-type', 'all'),
     category: valueOf('filter-category', 'all'),
-    minAmount: valueOf('filter-min-amount').trim(),
-    maxAmount: valueOf('filter-max-amount').trim()
+    min: valueOf('filter-min-amount').trim(),
+    max: valueOf('filter-max-amount').trim()
   };
 }
 
