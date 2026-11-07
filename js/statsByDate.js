@@ -24,7 +24,36 @@ function configureCanvas(canvas) {
   ctx.clearRect(0, 0, width, height);
   return { ctx, width, height };
 }
+// 根据最大金额选择合适的坐标轴上限
+function getNiceMax(value) {
+  const target = value * 1.1;
+  const magnitude = 10 ** Math.floor(Math.log10(target));
+  const normalized = target / magnitude;
 
+  let niceValue;
+  if (normalized <= 1) {
+    niceValue = 1;
+  } else if (normalized <= 2) {
+    niceValue = 2;
+  } else if (normalized <= 5) {
+    niceValue = 5;
+  } else {
+    niceValue = 10;
+  }
+
+  return niceValue * magnitude;
+}
+
+// 格式化 Y 轴金额
+function formatAxisValue(value) {
+  if (value >= 10000) {
+    return `¥${(value / 10000).toFixed(1)}万`;
+  }
+
+  return `¥${value.toLocaleString('zh-CN', {
+    maximumFractionDigits: value < 10 ? 3 : 0
+  })}`;
+}
 export function renderStatsByDate() {
   const canvas = document.getElementById('date-chart');
   const empty = document.getElementById('date-chart-empty');
@@ -41,13 +70,13 @@ export function renderStatsByDate() {
   const stage = configureCanvas(canvas);
   if (!stage) return;
   const { ctx, width, height } = stage;
-  const left = 56;
+  const left = 68;
   const right = 14;
   const top = 14;
   const bottom = 48;
   const plotWidth = Math.max(1, width - left - right);
   const plotHeight = Math.max(1, height - top - bottom);
-  const maxY = maximum * 1.15 || 1;
+  const maxY = getNiceMax(maximum);
 
   ctx.font = '12px sans-serif';
   ctx.textAlign = 'right';
@@ -61,7 +90,7 @@ export function renderStatsByDate() {
     ctx.lineTo(width - right, y);
     ctx.stroke();
     const value = maxY * (4 - i) / 4;
-    ctx.fillText(value >= 10000 ? `${(value / 10000).toFixed(1)}万` : value.toFixed(0), left - 7, y + 4);
+    ctx.fillText(formatAxisValue(value), left - 7, y + 4);
   }
 
   const segmentWidth = plotWidth / days.length;
