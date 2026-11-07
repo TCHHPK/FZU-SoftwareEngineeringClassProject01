@@ -3,12 +3,35 @@ import { getFilteredRecords } from './filter.js';
 
 function dailyTotals() {
   const data = new Map();
+  const today = new Date();
+
+  // 生成最近七个自然日的日期
+  const dates = [];
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+
+    dates.push(dateStr);
+    data.set(dateStr, {
+      date: dateStr,
+      income: 0,
+      expense: 0
+    });
+  }
+
+  // 汇总最近七天的收入和支出
   getFilteredRecords().forEach((r) => {
-    if (!data.has(r.date)) data.set(r.date, { date: r.date, income: 0, expense: 0 });
-    data.get(r.date)[r.type] += Math.round(r.amount * 100);
+    if (data.has(r.date)) {
+      data.get(r.date)[r.type] += Math.round(r.amount * 100);
+    }
   });
-  // 显示最近七个有记录的日期；所有筛选结果仍计入概览卡片。
-  return [...data.values()].sort((a, b) => a.date.localeCompare(b.date)).slice(-7);
+
+  return dates.map((date) => data.get(date));
 }
 
 function configureCanvas(canvas) {
@@ -72,12 +95,29 @@ export function renderStatsByDate() {
   const { ctx, width, height } = stage;
   const left = 68;
   const right = 14;
-  const top = 14;
+  const top = 36;
   const bottom = 48;
   const plotWidth = Math.max(1, width - left - right);
   const plotHeight = Math.max(1, height - top - bottom);
   const maxY = getNiceMax(maximum);
 
+  // 绘制收入、支出图例
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'left';
+
+  // 收入图例（绿色）
+  ctx.fillStyle = '#16a34a';
+  ctx.fillRect(left, 16, 10, 10);
+  ctx.fillStyle = '#475569';
+  ctx.fillText('收入', left + 15, 25);
+
+  // 支出图例（红色）
+  ctx.fillStyle = '#ef4444';
+  ctx.fillRect(left + 70, 16, 10, 10);
+  ctx.fillStyle = '#475569';
+  ctx.fillText('支出', left + 85, 25);
+
+  // 恢复 Y 轴标签绘制样式
   ctx.font = '12px sans-serif';
   ctx.textAlign = 'right';
   ctx.fillStyle = '#64748b';
