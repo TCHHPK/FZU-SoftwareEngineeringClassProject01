@@ -65,12 +65,18 @@ function normalizeCategories(categories) {
   };
 }
 
+function isValidDate(date) {
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  const parsed = new Date(`${date}T00:00:00Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
+}
+
 function isValidRecord(record) {
   return isPlainObject(record) &&
     typeof record.id === 'string' && record.id.trim() !== '' &&
     (record.type === 'income' || record.type === 'expense') &&
     typeof record.amount === 'number' && Number.isFinite(record.amount) && record.amount > 0 &&
-    /^\d{4}-\d{2}-\d{2}$/.test(record.date) &&
+    isValidDate(record.date) &&
     typeof record.category === 'string' && record.category.trim() !== '' &&
     (record.note === undefined || typeof record.note === 'string');
 }
@@ -177,14 +183,14 @@ export function loadData() {
     parsed = JSON.parse(raw);
   } catch (error) {
     const backupKey = backupCorrupted(raw);
-    console.error(`本地数据不是有效 JSON，已恢复默认数据${backupKey ? `，原数据备份在 ${backupKey}` : ''}`);
+    console.warn(`本地数据不是有效 JSON，已恢复默认数据${backupKey ? `，原数据备份在 ${backupKey}` : ''}`);
     return createDefaultData();
   }
 
   const repaired = repairData(parsed);
   if (repaired === null) {
     const backupKey = backupCorrupted(raw);
-    console.error(`本地数据结构无法识别，已恢复默认数据${backupKey ? `，原数据备份在 ${backupKey}` : ''}`);
+    console.warn(`本地数据结构无法识别，已恢复默认数据${backupKey ? `，原数据备份在 ${backupKey}` : ''}`);
     return createDefaultData();
   }
   // 结构被修复过（旧版本、手工改坏）时立即写回，避免每次打开都重新修复。

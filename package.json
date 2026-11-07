@@ -1,0 +1,13 @@
+{
+  "name": "team2-personal-bookkeeping",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "软件工程现场编程：个人记账本（原生 HTML/CSS/JS，无后端）",
+  "scripts": {
+    "test": "node tests/storage.mjs && node tests/smoke.mjs",
+    "test:storage": "node tests/storage.mjs",
+    "start": "python3 -m http.server 8000"
+  },
+  "license": "UNLICENSED"
+}
